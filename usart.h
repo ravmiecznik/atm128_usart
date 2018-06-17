@@ -62,7 +62,6 @@ private:
 public:
 	CircBuffer rx_buffer;
 	CircBuffer tx_buffer;
-	//volatile uint32_t* available;
 	Usart(usart_num u_num, uint32_t baud, Timer1& timer, uint32_t rx_buff_siz=100, uint32_t tx_buff_siz=100);
 	Timer1& timer;
 	void uart_init(uint32_t baud);
