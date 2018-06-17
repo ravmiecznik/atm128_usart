@@ -9,16 +9,11 @@
 
 #include "usart.h"
 #include <avr/interrupt.h>
-#include <avr/pgmspace.h>
-#include <avr/wdt.h>
-#include "commands_pgm.h"
-#include "leds/leds.h"
 #include "timers_r.h"
 #include <avr/delay.h>
 #include "prints.h"
 #include <string.h>
 
-extern Leds* global_leds;
 
 //TODO: implement option to resize rx or tx buffer size on demand
 
@@ -99,41 +94,6 @@ inline uint16_t calc_received_crc(uint8_t* buffer, uint16_t pos){
 	return (buffer[pos] + (buffer[pos+1]<<8));
 }
 
-//bool Usart::receive_data_amount(uint32_t amount, uint32_t timeout_ms, char* rdy_msg){
-//	register uint32_t tic;
-//	register uint32_t toc;
-//	uint16_t crc, received_crc;
-//	puts(rdy_msg);
-//	for(uint8_t t=0; t<=15; t++){
-//		tic = timer.tstamp_ms();
-//		toc = 0;
-//		wdt_reset();
-//		rx_buffer.flush();
-//		global_leds->L1.on();
-//		while(rx_buffer.available < amount){
-//			toc = timer.tstamp_ms();
-//			if((toc-tic) > timeout_ms){
-//				err((char*)"Timeout in data receive");
-//				rx_buffer.flush();
-//				return false;
-//			}
-//		}
-//		crc = calc_crc(rx_buffer.buffer, amount - 2);
-//		received_crc = calc_received_crc(rx_buffer.buffer, amount - 2);
-//		if(crc == received_crc)
-//			puts("ack\n");
-//		else{
-//			puts("fail\n");
-//			--t;
-//			_delay_ms(1000);
-//		}
-//		rx_buffer.flush();
-//		global_leds->L1.off();
-//		//do something with data
-//	}
-//	puts((char*)"received\n");
-//	return true;
-//}
 
 void Usart::puts_p(const char* data){
 	char c;

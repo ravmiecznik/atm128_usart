@@ -15,9 +15,17 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdio.h>
-#include "commands_pgm.h"
 #include "timers_r.h"
 #include <util/crc16.h>
+
+
+//this macro will create string in PGMSPACE with the same content as name like: rav = "rav"
+#define P(_NAME) const char PROGMEM _NAME [] = #_NAME
+
+//this macro will create only PGM array name (PROGMEM STRING ARRAY)
+#define PSA(_NAME) const char PROGMEM _NAME []
+PSA(ERR) = "Err: ";
+PSA(DBG) = "Dbg: ";
 
 #define _crc(crc, data) _crc_xmodem_update(crc, data)
 #define USART1_ENABLE
