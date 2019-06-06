@@ -9,9 +9,9 @@
 
 #include "usart.h"
 #include <avr/interrupt.h>
-#include "timers_r.h"
+//#include "timers_r.h"
 #include <avr/delay.h>
-#include "prints.h"
+#include "../prints.h"
 #include <string.h>
 
 
@@ -141,6 +141,23 @@ bool Usart::wait_for_message(char* msg, uint16_t timeout){
 	return true;
 }
 
+bool Usart::wait_for_data_amount(uint32_t amount, uint32_t timeout_ms, bool verbose){
+	uint32_t tic = timer.tstamp_ms();
+	uint32_t time_elapsed;
+	while(rx_buffer.available < amount){
+		time_elapsed = timer.tstamp_ms() - tic;
+		if(time_elapsed >= timeout_ms){
+			if(verbose){
+				printf0("Timeout in %s. File %s\n", __FUNCTION__, __FILE__);
+				printf("receiveid %u of ", rx_buffer.available);
+				printf("expected of %u\n", amount);
+			}
+			return false;
+		}
+	}
+	return true;
+}
+
 ////////USART0//////////////////////////////////////////////////////////////////////////
 #ifdef USART0_ENABLE
 	#define UART0_STATUS   UCSR0A
@@ -170,7 +187,7 @@ Purpose:  called when the UART has received a character
     usr  = UART0_STATUS;
     //frame_error = usr & _BV(4);
     data = UART0_DATA;
-    rx1_buffer->put(data);
+    rx0_buffer->put(data);
 }
 
 ISR(USART0_UDRE_vect)

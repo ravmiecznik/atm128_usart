@@ -10,12 +10,12 @@
 #ifndef USART_H_
 #define USART_H_
 
-#include "cbuffer.h"
+#include "../atm_cbuffer/cbuffer.h"
 #include <avr/io.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdio.h>
-#include "timers_r.h"
+#include "../atm128_timers/timers_r.h"
 #include <util/crc16.h>
 
 
@@ -29,6 +29,7 @@ PSA(DBG) = "Dbg: ";
 
 #define _crc(crc, data) _crc_xmodem_update(crc, data)
 #define USART1_ENABLE
+#define USART0_ENABLE
 
 #ifdef USART0_ENABLE
 void usart0_bind_buffers(CircBuffer* rx_buffer, CircBuffer* tx_buffer);
@@ -116,13 +117,15 @@ public:
 		rx_buffer.get(2, int_in_array);
 		return *(uint16_t*)int_in_array;
 	}
-	char* gets(char* buffer, char str_end = '\x00'){
-		//return rx_buffer.get_all(buffer);
-		return rx_buffer.gets(buffer, str_end);
+	char* gets(char* buffer, uint8_t expected_len, uint16_t timeout=2000){
+
 	}
 	char* gets(char str_end = '\x00'){
 		//return rx_buffer.get_all(buffer);
 		return rx_buffer.gets(str_end);
+	}
+	char* get_all(char* ext_buff){
+		return rx_buffer.get_all(ext_buff);
 	}
 	void operator << (char* string){
 		puts(string);
@@ -131,6 +134,7 @@ public:
 		puts_p(string);
 	}
 	bool receive_data_amount(uint32_t amount, uint32_t timeout_ms, char* rdy_msg = (char*)"");
+	bool wait_for_data_amount(uint32_t amount, uint32_t timeout_ms=1000, bool verbose=false);
 	void err(char* msg){
 		puts_p(ERR);Putchar(':');puts(msg);Putchar('\n');
 	}
@@ -147,6 +151,7 @@ public:
 		puts(DBG);puts(msg);Putchar('\n');
 	}
 	bool wait_for_message(char* msg, uint16_t t);
+
 	uint32_t available(){
 		return rx_buffer.available;
 	}
