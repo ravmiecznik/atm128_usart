@@ -11,14 +11,18 @@
 #include <avr/interrupt.h>
 //#include "timers_r.h"
 #include <avr/delay.h>
-#include "../prints.h"
+//#include "../prints.h"
 #include <string.h>
+//#include "../avr_ports/avr_ports.h"
 
+//extern AvrPin led_red;
 
 //TODO: implement option to resize rx or tx buffer size on demand
 
-Usart::Usart(usart_num usart, uint32_t baud, Timer1& timer, uint32_t rx_buff_siz, uint32_t tx_buff_siz):
-				rx_buffer(rx_buff_siz), tx_buffer(tx_buff_siz), timer(timer){
+//Usart::Usart(usart_num usart, uint32_t baud, Timer1& timer, uint32_t rx_buff_siz, uint32_t tx_buff_siz):
+//				rx_buffer(rx_buff_siz), tx_buffer(tx_buff_siz), timer(timer){
+Usart::Usart(usart_num usart, uint32_t baud, uint32_t rx_buff_siz, uint32_t tx_buff_siz):
+				rx_buffer(rx_buff_siz), tx_buffer(tx_buff_siz){
 #ifdef USART0_ENABLE
 	if(usart==usart0){
 		uart_status_register = &UCSR0A;
@@ -30,6 +34,7 @@ Usart::Usart(usart_num usart, uint32_t baud, Timer1& timer, uint32_t rx_buff_siz
 		udrie = UDRIE0;
 		u2x = U2X0;
 		/* Enable USART receiver and transmitter and receive complete interrupt */
+		rx_interrupt_enable_bit = RXCIE0;
 		uart_enable_flags = _BV(RXCIE0)|_BV(RXEN0)|_BV(TXEN0);
 		uart_async_8bit_noparity_1stopbit_flags = _BV(UCSZ01) | _BV(UCSZ00);
 		usart0_bind_buffers(&rx_buffer, &tx_buffer);
@@ -45,6 +50,7 @@ Usart::Usart(usart_num usart, uint32_t baud, Timer1& timer, uint32_t rx_buff_siz
 		udrie = UDRIE1;
 		u2x = U2X1;
 		/* Enable USART receiver and transmitter and receive complete interrupt */
+		rx_interrupt_enable_bit = RXCIE1;
 		uart_enable_flags = _BV(RXCIE1)|_BV(RXEN1)|_BV(TXEN1);
 		uart_async_8bit_noparity_1stopbit_flags = _BV(UCSZ11) | _BV(UCSZ10);
 		usart1_bind_buffers(&rx_buffer, &tx_buffer);
@@ -123,40 +129,47 @@ void Usart::uart_init(uint32_t baudrate){
 	*uart_control_register_C = uart_async_8bit_noparity_1stopbit_flags;
 }
 
-bool Usart::wait_for_message(char* msg, uint16_t timeout){
-	char tmp[100];
-	uint32_t t0 = timer.tstamp_ms();
-	rx_buffer.flush();
-	while (true){
-		if(rx_buffer.available and rx_buffer.is_in_buffer(msg)){
-			return true;
-			rx_buffer.flush();
-		}
-		else if(timer.tstamp_ms() - t0 > timeout){
-			printf0("Timeout waiting for %s\n", msg);
-			return false;
-		}
-		_delay_ms(10);
-	}
-	return true;
+void Usart::rx_interrupt_disable(){
+	*uart_control_register_B &= ~_BV(rx_interrupt_enable_bit);
 }
 
-bool Usart::wait_for_data_amount(uint32_t amount, uint32_t timeout_ms, bool verbose){
-	uint32_t tic = timer.tstamp_ms();
-	uint32_t time_elapsed;
-	while(rx_buffer.available < amount){
-		time_elapsed = timer.tstamp_ms() - tic;
-		if(time_elapsed >= timeout_ms){
-			if(verbose){
-				printf0("Timeout in %s. File %s\n", __FUNCTION__, __FILE__);
-				printf("receiveid %u of ", rx_buffer.available);
-				printf("expected of %u\n", amount);
-			}
-			return false;
-		}
-	}
-	return true;
+void Usart::rx_interrupt_enable(){
+	*uart_control_register_B |= _BV(rx_interrupt_enable_bit);
 }
+//bool Usart::wait_for_message(char* msg, uint16_t timeout){
+//	char tmp[100];
+//	uint32_t t0 = timer.tstamp_ms();
+//	rx_buffer.flush();
+//	while (true){
+//		if(rx_buffer.available and rx_buffer.is_in_buffer(msg)){
+//			return true;
+//			rx_buffer.flush();
+//		}
+//		else if(timer.tstamp_ms() - t0 > timeout){
+//			printf0("Timeout waiting for %s\n", msg);
+//			return false;
+//		}
+//		_delay_ms(10);
+//	}
+//	return true;
+//}
+
+//bool Usart::wait_for_data_amount(uint32_t amount, uint32_t timeout_ms, bool verbose){
+//	uint32_t tic = timer.tstamp_ms();
+//	uint32_t time_elapsed;
+//	while(rx_buffer.available < amount){
+//		time_elapsed = timer.tstamp_ms() - tic;
+//		if(time_elapsed >= timeout_ms){
+//			if(verbose){
+//				printf0("Timeout in %s. File %s\n", __FUNCTION__, __FILE__);
+//				printf("receiveid %u of ", rx_buffer.available);
+//				printf("expected of %u\n", amount);
+//			}
+//			return false;
+//		}
+//	}
+//	return true;
+//}
 
 ////////USART0//////////////////////////////////////////////////////////////////////////
 #ifdef USART0_ENABLE
@@ -184,10 +197,12 @@ Purpose:  called when the UART has received a character
     //bool frame_error;
 
     /* read UART status register and UART data register */
-    usr  = UART0_STATUS;
+    //usr  = UART0_STATUS;
     //frame_error = usr & _BV(4);
-    data = UART0_DATA;
-    rx0_buffer->put(data);
+    //if(rx0_buffer->free_space() >= 1){
+    	data = UART0_DATA;
+    	rx0_buffer->put(data);
+    //}
 }
 
 ISR(USART0_UDRE_vect)
@@ -228,14 +243,20 @@ Purpose:  called when the UART has received a character
 **************************************************************************/
 {
     volatile uint8_t data;
-    //uint8_t usr;
-    //bool frame_error;
+    uint8_t usr;
+    bool frame_error;
 
     /* read UART status register and UART data register */
-    //usr  = UART1_STATUS;
-    //frame_error = usr & _BV(4);
-    data = UART1_DATA;
-    rx1_buffer->put(data);
+//    usr  = UART1_STATUS;
+//    frame_error = usr & _BV(4);
+//
+//    if(frame_error)
+//    		led_red.toggle();
+
+    //if(rx1_buffer->free_space() >= 1){
+    	data = UART1_DATA;
+    	rx1_buffer->put(data);
+    //}
 }
 
 ISR(USART1_UDRE_vect)

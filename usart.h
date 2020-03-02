@@ -15,7 +15,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdio.h>
-#include "../atm128_timers/timers_r.h"
+//#include "../atm128_timers/timers_r.h"
 #include <util/crc16.h>
 
 
@@ -56,16 +56,21 @@ private:
 	volatile uint8_t* uart_data_register;
 	volatile uint8_t* ubrrh_register;
 	volatile uint8_t* ubrrl_register;
+	uint8_t rx_interrupt_enable_bit;
 	uint8_t uart_enable_flags;
+	//uint8_t uart_disable_flags;
 	uint8_t uart_async_8bit_noparity_1stopbit_flags;
 	uint8_t udrie;
 	uint8_t u2x;
 public:
 	CircBuffer rx_buffer;
 	CircBuffer tx_buffer;
-	Usart(usart_num u_num, uint32_t baud, Timer1& timer, uint32_t rx_buff_siz=100, uint32_t tx_buff_siz=100);
-	Timer1& timer;
+	//Usart(usart_num u_num, uint32_t baud, Timer1& timer, uint32_t rx_buff_siz=100, uint32_t tx_buff_siz=100);
+	Usart(usart_num u_num, uint32_t baud, uint32_t rx_buff_siz=100, uint32_t tx_buff_siz=100);
+	//Timer1& timer;
 	void uart_init(uint32_t baud);
+	void rx_interrupt_disable();
+	void rx_interrupt_enable();
 	void Putchar(char c);
 	int fputc(int c, FILE* stream){
 		char tmp = c;
@@ -106,12 +111,21 @@ public:
 		puts_p(str);
 		Putchar(c);
 	}
+
 	char get(){
 		return rx_buffer.get();
 	}
+
+
 	void get(uint32_t amount, uint8_t* ext_buffer){
 		rx_buffer.get(amount, ext_buffer);
 	}
+
+	char* get(uint32_t amount, char* ext_buffer){
+		rx_buffer.get(amount, ext_buffer);
+		return ext_buffer;
+	}
+
 	uint16_t get_uint(){
 		uint8_t int_in_array[2];
 		rx_buffer.get(2, int_in_array);
