@@ -9,18 +9,9 @@
 
 #include "usart.h"
 #include <avr/interrupt.h>
-//#include "timers_r.h"
 #include <avr/delay.h>
-//#include "../prints.h"
 #include <string.h>
-//#include "../avr_ports/avr_ports.h"
 
-//extern AvrPin led_red;
-
-//TODO: implement option to resize rx or tx buffer size on demand
-
-//Usart::Usart(usart_num usart, uint32_t baud, Timer1& timer, uint32_t rx_buff_siz, uint32_t tx_buff_siz):
-//				rx_buffer(rx_buff_siz), tx_buffer(tx_buff_siz), timer(timer){
 Usart::Usart(usart_num usart, uint32_t baud, uint32_t rx_buff_siz, uint32_t tx_buff_siz):
 				rx_buffer(rx_buff_siz), tx_buffer(tx_buff_siz){
 #ifdef USART0_ENABLE
@@ -68,51 +59,43 @@ void Usart::Putchar(char c){
 	*uart_control_register_B |= _BV(udrie);
 }
 
-//void Usart::putchar(uint8_t c){
+
+//void Usart::puts(uint32_t amount, uint8_t* buffer){
 //	while ( tx_buffer.available == tx_buffer.size ) {
 //		;/* wait for free space in buffer */
 //	}
-//	tx_buffer.put(c);
+//	tx_buffer.put(amount, buffer);
 //	/* enable UDRE interrupt */
 //	*uart_control_register_B |= _BV(udrie);
 //}
 
-void Usart::puts(uint32_t amount, uint8_t* buffer){
-	while ( tx_buffer.available == tx_buffer.size ) {
-		;/* wait for free space in buffer */
-	}
-	tx_buffer.put(amount, buffer);
-	/* enable UDRE interrupt */
-	*uart_control_register_B |= _BV(udrie);
-}
+//void Usart::puts(uint8_t* buffer){
+//	while ( tx_buffer.available == tx_buffer.size ) {
+//		;/* wait for free space in buffer */
+//	}
+//	tx_buffer.puts(buffer);
+//	/* enable UDRE interrupt */
+//	*uart_control_register_B |= _BV(udrie);
+//	_delay_ms(1);
+//}
 
-void Usart::puts(uint8_t* buffer){
-	while ( tx_buffer.available == tx_buffer.size ) {
-		;/* wait for free space in buffer */
-	}
-	tx_buffer.puts(buffer);
-	/* enable UDRE interrupt */
-	*uart_control_register_B |= _BV(udrie);
-	_delay_ms(1);
-}
-
-inline uint16_t calc_received_crc(uint8_t* buffer, uint16_t pos){
-	return (buffer[pos] + (buffer[pos+1]<<8));
-}
+//inline uint16_t calc_received_crc(uint8_t* buffer, uint16_t pos){
+//	return (buffer[pos] + (buffer[pos+1]<<8));
+//}
 
 
-void Usart::puts_p(const char* data){
-	char c;
-	uint32_t i=0;
-	while ( tx_buffer.available == tx_buffer.size ) {
-		;/* wait for free space in tx buffer */
-	}
-	while(c=pgm_read_byte(data+(i++))){
-		tx_buffer.put(c);
-	}
-	*uart_control_register_B |= _BV(udrie);
-	_delay_ms(1);
-}
+//void Usart::puts_p(const char* data){
+//	char c;
+//	uint32_t i=0;
+//	while ( tx_buffer.available == tx_buffer.size ) {
+//		;/* wait for free space in tx buffer */
+//	}
+//	while(c=pgm_read_byte(data+(i++))){
+//		tx_buffer.put(c);
+//	}
+//	*uart_control_register_B |= _BV(udrie);
+//	_delay_ms(1);
+//}
 
 void Usart::uart_init(uint32_t baudrate){
 	baudrate = F_CPU/16/baudrate -1;
@@ -136,40 +119,6 @@ void Usart::rx_interrupt_disable(){
 void Usart::rx_interrupt_enable(){
 	*uart_control_register_B |= _BV(rx_interrupt_enable_bit);
 }
-//bool Usart::wait_for_message(char* msg, uint16_t timeout){
-//	char tmp[100];
-//	uint32_t t0 = timer.tstamp_ms();
-//	rx_buffer.flush();
-//	while (true){
-//		if(rx_buffer.available and rx_buffer.is_in_buffer(msg)){
-//			return true;
-//			rx_buffer.flush();
-//		}
-//		else if(timer.tstamp_ms() - t0 > timeout){
-//			printf0("Timeout waiting for %s\n", msg);
-//			return false;
-//		}
-//		_delay_ms(10);
-//	}
-//	return true;
-//}
-
-//bool Usart::wait_for_data_amount(uint32_t amount, uint32_t timeout_ms, bool verbose){
-//	uint32_t tic = timer.tstamp_ms();
-//	uint32_t time_elapsed;
-//	while(rx_buffer.available < amount){
-//		time_elapsed = timer.tstamp_ms() - tic;
-//		if(time_elapsed >= timeout_ms){
-//			if(verbose){
-//				printf0("Timeout in %s. File %s\n", __FUNCTION__, __FILE__);
-//				printf("receiveid %u of ", rx_buffer.available);
-//				printf("expected of %u\n", amount);
-//			}
-//			return false;
-//		}
-//	}
-//	return true;
-//}
 
 ////////USART0//////////////////////////////////////////////////////////////////////////
 #ifdef USART0_ENABLE

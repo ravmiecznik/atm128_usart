@@ -72,40 +72,40 @@ public:
 	void rx_interrupt_disable();
 	void rx_interrupt_enable();
 	void Putchar(char c);
-	int fputc(int c, FILE* stream){
-		char tmp = c;
-		Putchar(tmp);
-		return c;
-	}
-	void puts(uint32_t amount, uint8_t* data);
-	void puts(uint8_t* data);
-	void puts(uint8_t* data, char c){
-		puts(data);
-		Putchar(c);
-	}
-	void puts(char* data){
-		puts((uint8_t*)data);
-	};
-	void puts(char* data, char c){
-		puts((uint8_t*)data);
-		Putchar(c);
-	};
-	void puts(const char* data){
-		puts((uint8_t*)data);
-	};
-	void puts(const char* data, char endchar){
-		puts((uint8_t*)data);
-		Putchar(endchar);
-	};
-	void puts(int64_t value){
-		char tmp[10];
-		puts(ltoa(value, tmp, 10));
-	}
-	void puts(int64_t value, char endchar){
-		char tmp[10];
-		puts(ltoa(value, tmp, 10));
-		Putchar(endchar);
-	}
+//	int fputc(int c, FILE* stream){
+//		char tmp = c;
+//		Putchar(tmp);
+//		return c;
+//	}
+//	void puts(uint32_t amount, uint8_t* data);
+//	void puts(uint8_t* data);
+//	void puts(uint8_t* data, char c){
+//		puts(data);
+//		Putchar(c);
+//	}
+//	void puts(char* data){
+//		puts((uint8_t*)data);
+//	};
+//	void puts(char* data, char c){
+//		puts((uint8_t*)data);
+//		Putchar(c);
+//	};
+//	void puts(const char* data){
+//		puts((uint8_t*)data);
+//	};
+//	void puts(const char* data, char endchar){
+//		puts((uint8_t*)data);
+//		Putchar(endchar);
+//	};
+//	void puts(int64_t value){
+//		char tmp[10];
+//		puts(ltoa(value, tmp, 10));
+//	}
+//	void puts(int64_t value, char endchar){
+//		char tmp[10];
+//		puts(ltoa(value, tmp, 10));
+//		Putchar(endchar);
+//	}
 	void puts_p(const char*);
 	void puts_p(const char* str, char c){
 		puts_p(str);
@@ -134,37 +134,37 @@ public:
 	char* gets(char* buffer, uint8_t expected_len, uint16_t timeout=2000){
 
 	}
-	char* gets(char str_end = '\x00'){
-		//return rx_buffer.get_all(buffer);
-		return rx_buffer.gets(str_end);
-	}
+//	char* gets(char str_end = '\x00'){
+//		//return rx_buffer.get_all(buffer);
+//		return rx_buffer.gets(str_end);
+//	}
 	char* get_all(char* ext_buff){
 		return rx_buffer.get_all(ext_buff);
 	}
-	void operator << (char* string){
-		puts(string);
-	}
-	void operator << (const char* string){
-		puts_p(string);
-	}
-	bool receive_data_amount(uint32_t amount, uint32_t timeout_ms, char* rdy_msg = (char*)"");
-	bool wait_for_data_amount(uint32_t amount, uint32_t timeout_ms=1000, bool verbose=false);
-	void err(char* msg){
-		puts_p(ERR);Putchar(':');puts(msg);Putchar('\n');
-	}
-	void err_p(const char* msg){
-		puts_p(ERR);puts_p(msg);Putchar('\n');
-	}
-	void err(const char* msg){
-		puts_p(ERR);puts(msg);Putchar('\n');
-	}
-	void dbg_p(const char* msg){
-		puts_p(DBG);puts_p(msg);Putchar('\n');
-	}
-	void dbg(const char* msg){
-		puts(DBG);puts(msg);Putchar('\n');
-	}
-	bool wait_for_message(char* msg, uint16_t t);
+//	void operator << (char* string){
+//		puts(string);
+//	}
+//	void operator << (const char* string){
+//		puts_p(string);
+//	}
+//	bool receive_data_amount(uint32_t amount, uint32_t timeout_ms, char* rdy_msg = (char*)"");
+//	bool wait_for_data_amount(uint32_t amount, uint32_t timeout_ms=1000, bool verbose=false);
+//	void err(char* msg){
+//		puts_p(ERR);Putchar(':');puts(msg);Putchar('\n');
+//	}
+//	void err_p(const char* msg){
+//		puts_p(ERR);puts_p(msg);Putchar('\n');
+//	}
+//	void err(const char* msg){
+//		puts_p(ERR);puts(msg);Putchar('\n');
+//	}
+//	void dbg_p(const char* msg){
+//		puts_p(DBG);puts_p(msg);Putchar('\n');
+//	}
+//	void dbg(const char* msg){
+//		puts(DBG);puts(msg);Putchar('\n');
+//	}
+//	bool wait_for_message(char* msg, uint16_t t);
 
 	uint32_t available(){
 		return rx_buffer.available;
