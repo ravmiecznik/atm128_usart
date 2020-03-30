@@ -70,41 +70,13 @@ public:
 	void rx_interrupt_enable();
 	void Putchar(char c);
 	void puts_p(const char*);
-	void puts_p(const char* str, char c){
-		puts_p(str);
-		Putchar(c);
-	}
-
-	char get(){
-		return rx_buffer.get();
-	}
-
-
-	void get(uint32_t amount, uint8_t* ext_buffer){
-		rx_buffer.get(amount, ext_buffer);
-	}
-
-	char* get(uint32_t amount, char* ext_buffer){
-		rx_buffer.get(amount, ext_buffer);
-		return ext_buffer;
-	}
-
-	uint16_t get_uint(){
-		uint8_t int_in_array[2];
-		rx_buffer.get(2, int_in_array);
-		return *(uint16_t*)int_in_array;
-	}
-	char* gets(char* buffer, uint8_t expected_len, uint16_t timeout=2000){
-
-	}
-
-	char* get_all(char* ext_buff){
-		return rx_buffer.get_all(ext_buff);
-	}
-
-	uint32_t available(){
-		return rx_buffer.available;
-	}
+	void puts_p(const char* str, char c);
+	char get();
+	void get(uint32_t amount, uint8_t* ext_buffer);
+	char* get(uint32_t amount, char* ext_buffer);
+	uint16_t get_uint();
+	char* get_all(char* ext_buff);
+	uint32_t available();
 };
 
 

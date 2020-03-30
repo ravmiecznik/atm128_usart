@@ -82,6 +82,38 @@ void Usart::rx_interrupt_enable(){
 	*uart_control_register_B |= _BV(rx_interrupt_enable_bit);
 }
 
+uint16_t Usart::get_uint(){
+	uint8_t int_in_array[2];
+	rx_buffer.get(2, int_in_array);
+	return *(uint16_t*)int_in_array;
+}
+
+char Usart::get(){
+	return rx_buffer.get();
+}
+
+void Usart::get(uint32_t amount, uint8_t* ext_buffer){
+	rx_buffer.get(amount, ext_buffer);
+}
+
+char* Usart::get(uint32_t amount, char* ext_buffer){
+	rx_buffer.get(amount, ext_buffer);
+	return ext_buffer;
+}
+
+char* Usart::get_all(char* ext_buff){
+	return rx_buffer.get_all(ext_buff);
+}
+
+uint32_t Usart::available(){
+		return rx_buffer.available;
+}
+
+void Usart::puts_p(const char* str, char c){
+		puts_p(str);
+		Putchar(c);
+}
+
 ////////USART0//////////////////////////////////////////////////////////////////////////
 #ifdef USART0_ENABLE
 	#define UART0_STATUS   UCSR0A
