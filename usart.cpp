@@ -59,44 +59,6 @@ void Usart::Putchar(char c){
 	*uart_control_register_B |= _BV(udrie);
 }
 
-
-//void Usart::puts(uint32_t amount, uint8_t* buffer){
-//	while ( tx_buffer.available == tx_buffer.size ) {
-//		;/* wait for free space in buffer */
-//	}
-//	tx_buffer.put(amount, buffer);
-//	/* enable UDRE interrupt */
-//	*uart_control_register_B |= _BV(udrie);
-//}
-
-//void Usart::puts(uint8_t* buffer){
-//	while ( tx_buffer.available == tx_buffer.size ) {
-//		;/* wait for free space in buffer */
-//	}
-//	tx_buffer.puts(buffer);
-//	/* enable UDRE interrupt */
-//	*uart_control_register_B |= _BV(udrie);
-//	_delay_ms(1);
-//}
-
-//inline uint16_t calc_received_crc(uint8_t* buffer, uint16_t pos){
-//	return (buffer[pos] + (buffer[pos+1]<<8));
-//}
-
-
-//void Usart::puts_p(const char* data){
-//	char c;
-//	uint32_t i=0;
-//	while ( tx_buffer.available == tx_buffer.size ) {
-//		;/* wait for free space in tx buffer */
-//	}
-//	while(c=pgm_read_byte(data+(i++))){
-//		tx_buffer.put(c);
-//	}
-//	*uart_control_register_B |= _BV(udrie);
-//	_delay_ms(1);
-//}
-
 void Usart::uart_init(uint32_t baudrate){
 	baudrate = F_CPU/16/baudrate -1;
 	if ( baudrate & 0x8000 ) {
