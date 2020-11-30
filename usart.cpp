@@ -12,7 +12,15 @@
 #include <avr/delay.h>
 #include <string.h>
 
-Usart::Usart(usart_num usart, uint32_t baud, uint32_t rx_buff_siz, uint32_t tx_buff_siz):
+void rx_null_function(uint8_t data)
+{
+
+}
+
+void (*RX_FUNCTION_U0)(uint8_t data) = rx_null_function;
+void (*RX_FUNCTION_U1)(uint8_t data) = rx_null_function;
+
+Usart::Usart(usart_num usart, uint32_t baud, uint32_t rx_buff_siz, uint32_t tx_buff_siz, void (*rx_action)(uint8_t data)):
 				rx_buffer(rx_buff_siz), tx_buffer(tx_buff_siz){
 #ifdef USART0_ENABLE
 	if(usart==usart0){
@@ -29,6 +37,7 @@ Usart::Usart(usart_num usart, uint32_t baud, uint32_t rx_buff_siz, uint32_t tx_b
 		uart_enable_flags = _BV(RXCIE0)|_BV(RXEN0)|_BV(TXEN0);
 		uart_async_8bit_noparity_1stopbit_flags = _BV(UCSZ01) | _BV(UCSZ00);
 		usart0_bind_buffers(&rx_buffer, &tx_buffer);
+		RX_FUNCTION_U0 = rx_action;
 	}
 #endif
 	if(usart==usart1){
@@ -45,7 +54,9 @@ Usart::Usart(usart_num usart, uint32_t baud, uint32_t rx_buff_siz, uint32_t tx_b
 		uart_enable_flags = _BV(RXCIE1)|_BV(RXEN1)|_BV(TXEN1);
 		uart_async_8bit_noparity_1stopbit_flags = _BV(UCSZ11) | _BV(UCSZ10);
 		usart1_bind_buffers(&rx_buffer, &tx_buffer);
+		RX_FUNCTION_U1 = rx_action;
 	}
+
 	uart_init(baud);
 
 }
@@ -146,6 +157,7 @@ Purpose:  called when the UART has received a character
     	data = UART0_DATA;
     	rx0_buffer->put(data);
     //}
+    	RX_FUNCTION_U0(data);
 }
 
 ISR(USART0_UDRE_vect)
@@ -200,6 +212,7 @@ Purpose:  called when the UART has received a character
     	data = UART1_DATA;
     	rx1_buffer->put(data);
     //}
+    	RX_FUNCTION_U1(data);
 }
 
 ISR(USART1_UDRE_vect)

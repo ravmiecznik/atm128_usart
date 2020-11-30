@@ -46,6 +46,8 @@ enum usart_num{
 	usart1,
 };
 
+void rx_null_function(uint8_t data);
+
 
 //TODO: to use cbuffer methods test inheritance of cbuffer
 class Usart{
@@ -64,7 +66,7 @@ private:
 public:
 	CircBuffer rx_buffer;
 	CircBuffer tx_buffer;
-	Usart(usart_num u_num, uint32_t baud, uint32_t rx_buff_siz=100, uint32_t tx_buff_siz=100);
+	Usart(usart_num u_num, uint32_t baud, uint32_t rx_buff_siz=100, uint32_t tx_buff_siz=100, void (*rx_action)(uint8_t data)=rx_null_function);
 	void uart_init(uint32_t baud);
 	void rx_interrupt_disable();
 	void rx_interrupt_enable();
